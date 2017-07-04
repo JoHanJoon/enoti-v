@@ -1,6 +1,7 @@
 VSFTPD_DATETIME %{DAY} %{MONTH} %{SPACE}%{NUMBER} %{TIME} %{YEAR}
-VSFTPD_CONNECT \A%{VSFTPD_DATETIME:datetime} \[pid %{NUMBER:vsftpd_pid}] %{WORD:vsftpd_action}: Client "%{IP:vsftpd_client_ip}"
-VSFTPD_LOGIN \A%{VSFTPD_DATETIME:datetime} \[pid %{NUMBER:vsftpd_pid}] \[%{WORD:vsftpd_user}] %{WORD:vsftpd_action_status} %{WORD:vsftpd_action}: Client "%{IP:vsftpd_client_ip}"
-VSFTPD_TRANSFER \A%{VSFTPD_LOGIN}, "%{PATH:vsftpd_file_path}", %{NUMBER:vsftpd_file_size} bytes, %{NUMBER:vsftpd_file_transfer_speed}Kbyte/sec
-VSFTPD_DELETE \A%{VSFTPD_LOGIN}, "%{PATH:vsftpd_file_path}"
-VSFTPD_RENAME \A%{VSFTPD_LOGIN}, "%{PATH:vsftpd_file_path} %{PATH:vsftpd_file_rename_path}"
+VSFTPD_CONNECT %{VSFTPD_DATETIME:datetime} \[pid %{NUMBER:vsftpd_pid}] %{WORD:vsftpd_action}: Client \"%{IP:vsftpd_client_ip}\"
+VSFTPD_LOGIN %{VSFTPD_DATETIME:datetime} \[pid %{NUMBER:vsftpd_pid}\] \[%{WORD:vsftpd_user}\] %{WORD:vsftpd_action_status} %{WORD:vsftpd_action}: Client \"%{IP:vsftpd_client_ip}\"
+VSFTPD_DELETE_PARAMS \"%{UNIXPATH2:vsftpd_file_path}\"
+VSFTPD_RENAME_PARAMS \"%{UNIXPATH2:vsftpd_file_path} %{UNIXPATH2:vsftpd_file_rename_path}\"
+VSFTPD_TRANSFER_PARAMS \"%{UNIXPATH2:vsftpd_file_path}\"(, %{NUMBER:vsftpd_file_size} bytes)?(, %{NUMBER:vsftpd_file_transfer_speed}Kbyte/sec)?
+UNIXPATH2 (/([\w\?\s_%!$@:.,+~-]+|\\.)*)+

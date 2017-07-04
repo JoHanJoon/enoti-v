@@ -10,7 +10,8 @@ Eventlog Notification for VSFTP(이하: enoti-v)는 Logstash를 이용하여 VSF
 
 ## Requirements
 
-Logstash를 구동하기 위한 Java 1.8이 필요합니다.
+- Logstash를 구동하기 위한 Java 1.8이 필요합니다.
+- 메일 전송을 위해 sendmail 서비스가 로컬에 실행되어 있어야 합니다.
 
 ## Installation
 
@@ -154,10 +155,11 @@ email_from: "ftpguest@sample.com"
 
 > /etc/logstash/conf.d/props/___vsftp-users.yml___
 
-Logstash의 _filter_ 섹션의 _translate_ 플러그인에서 사용할 딕셔너리 파일을 생성합니다. _translate_ 플러그인은 외부 파일로 로드한 Key/Value 사전으로부터 값을 검색하거나 변환할 수 있습니다. 자세한 내용은 [공식 문서: plugins-filters-translate#_dictionary_path](https://www.elastic.co/guide/en/logstash/current/plugins-filters-translate.html#plugins-filters-translate-dictionary_path)을 참고하시길 바랍니다. 본 가이드에서는 VSFTP의 사용자 계정 별 메타 정보를 확인하기 위해 활용되며 이벤트를 수신할 Email과 SMS 번호를 저장합니다. `{FTP_ACCOUNT}: "{USER_EMAIL}/{USER_PHONE_NUMBER}"`와 같은 형식으로 정의하며 다음은 예시입니다.
+Logstash의 _filter_ 섹션의 _translate_ 플러그인에서 사용할 딕셔너리 파일을 생성합니다. _translate_ 플러그인은 외부 파일로 로드한 Key/Value 사전으로부터 값을 검색하거나 변환할 수 있습니다. 자세한 내용은 [공식 문서: plugins-filters-translate#_dictionary_path](https://www.elastic.co/guide/en/logstash/current/plugins-filters-translate.html#plugins-filters-translate-dictionary_path)을 참고하시길 바랍니다. 본 가이드에서는 VSFTP의 사용자 계정 별 메타 정보를 확인하기 위해 활용되며 이벤트를 수신할 Email과 SMS 번호를 저장합니다. `{FTP_ACCOUNT}: "{USER_EMAIL}/{USER_PHONE_NUMBER}"`와 같은 형식으로 정의하며 멀티 대상을 지정 시 `콤마 ,{USER_EMAIL}`로 추가 할 수 있습니다. 다음은 예시입니다.
 
 ```yaml
 ftpguest: "ftpguest@sample.com/01012345678"
+ftpother: "ftpother1@sample.com,ftpother2@sample.com/01012345678,01087654321"
 ```
 
 전체 예시는 [첨부파일](etc/logstash/conf.d/props/vsftp-users.yml)을 참고하세요.
@@ -177,7 +179,31 @@ tail -n 100 /var/log/logstash/logstash-plain.log | grep WARN
 chmod +r /var/log/vsftpd.log
 ```
 
+### Email 전송이 실패하는 경우
 
+Logslash의 email 플러그인은 다양한 메일 서버를 지원하지만 본 가이드에서는 기본 설정으로 로컬의 [Sendmail](https://en.wikipedia.org/wiki/Sendmail) 을 사용해 메일을 전송합니다. 별도의 메일 서버(_gmail and etc.._)를 사용하기 위해서는 해당 밴더의 가이드에따라 설정 변경이 필요합니다. 만약 기본 설정을 유지 한다면 하기와 같이 Sendmail이 정상적으로 실행 중인지 확인이 필요합니다.
+
+```shell
+# Sendmail 서비스 상태 확인
+service sendmail status
+sendmail (pid  19772) is running...
+sm-client (pid  19782) is running...
+
+# Sendmail이 설치되지 않았거나 재설치가 필요할 경우
+rpm -qa sendmail*
+yum install sendmail sendmail-cf
+/etc/init.d/sendmail start
+```
+
+### 한글 파일 문제
+
+VSFTP를 소스 빌드하여 설치하지 않는한 기본적으로 로그에 한글 깨짐 현상이 발생합니다. 정규식을 통해 해당 Path를 매칭하는 것은 가능 하지만 복원은 불가능 합니다. 추가로 Upload/Download 시 파일 크기가 나오지 않습니다.
+
+```shell
+Fri Jun 30 12:08:04 2017 [pid 30490] [test] OK UPLOAD: Client "10.0.0.1", "/test/??? Microsoft Word ??????.docx", 0.00Kbyte/sec
+```
+
+본 가이드에서는 파일 크기 누락시 0 bytes 로 예외 처리 합니다.
 
 ## Next
 
