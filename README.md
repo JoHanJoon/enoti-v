@@ -43,7 +43,7 @@ rpm -i logstash-5.4.2.rpm
 
 ```shell
 # configuration clone
-curl -L -O https://github.com/gsneotek-wisen/enoti-v/archive/v0.1.tar.gz
+curl -L -O https://github.com/gsneotek-wisen/enoti-v/archive/v0.2.tar.gz
 tar xvzf v0.1.tar.gz
 cp ./enoti-v-0.1/etc/logstash/conf.d/* /etc/logstash/conf.d/ -rf
 
